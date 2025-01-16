@@ -170,6 +170,29 @@ build {
     inline          = ["mkdir ${local.image_folder}", "chmod 777 ${local.image_folder}"]
   }
 
+  provisioner "file" {
+    destination = "${local.helper_script_folder}"
+    source      = "${path.root}/../scripts/helpers"
+  }
+
+  provisioner "file" {
+    destination = "${local.installer_script_folder}"
+    source      = "${path.root}/../scripts/build"
+  }
+
+  provisioner "file" {
+    destination = "${local.image_folder}"
+    sources     = [
+      "${path.root}/../assets/post-gen",
+      "${path.root}/../scripts/tests"
+    ]
+  }
+
+  provisioner "file" {
+    destination = "${local.installer_script_folder}/toolset.json"
+    source      = "${path.root}/../toolsets/${local.toolset_file_name}"
+  }
+
   // Add apt wrapper to implement retries
   provisioner "shell" {
     execute_command = "sudo sh -c '{{ .Vars }} {{ .Path }}'"
@@ -185,7 +208,7 @@ build {
       "${path.root}/../scripts/build/configure-apt.sh"
     ]
   }
-  
+
   // Configure limits
   provisioner "shell" {
     execute_command = "sudo sh -c '{{ .Vars }} {{ .Path }}'"
